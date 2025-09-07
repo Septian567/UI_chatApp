@@ -32,9 +32,124 @@ TODO 4 Agustus 2025
 1. perbaiki fitur rekam suara  -- SUCCESS
 
 TODO 5 Agustus 2025
-1. tambah fitur kamera saat tampilan mobile di form pesan
-2. tambah fitur edit pesan -- SUCCESS
-3. tambah fitur hapus pesan (teks dan file)
-4. pastikan saat pesan ditambah, tampilan otomatis scrol ke pesan paling bawah
+1. tambah fitur edit pesan -- SUCCESS
+
+TODO 7 Agustus 2025
+1. tambah fitur hapus pesan
+- hapus untuk saya -- SUCCESS
+- hapus di database -- SUCCESS
+- perbaiki tombol -- SUCCESS
+
+2. tambah fitur insert caption di tambah file -- SUCCESS
+
+TODO 13 Agustus 2025
+1. tambah fitur edit pesan di fileMessage -- SUCCESS
+2. perbaiki tampilannya -- SUCCESS
+3. tambah tombol hapus untuk saya dan hapus pesan di pesan audio  -- SUCCESS
+4. pisahkan hook dan komponen -- SUCCESS
+
+TODO 14 Agustus 2025
+2. pastikan saat pesan ditambah, tampilan otomatis scrol ke pesan paling bawah -- SUCCESS
+3. tambah fitur kamera saat tampilan mobile di form pesan -- SUCCESS
 
 
+TODO 15 Agustus 2025
+1. pastikan fitur kamera berfungsi dengan baik --SUCCESS
+
+TODO 16 Agustus 2025
+1. pastikan foto yang diambil dari kamera bisa dilihat dulu sebelum di kirim -- SUCCESS
+2. pastikan container saat mengambil foto dan menampilkan foto sama dan rapi -- SUCCESS
+3. foto yang diambil dari kamera bisa ditambah caption sebelum di kirim -- SUCCESS
+4. pastikan video yang diambil dari kamera bisa dilihat dulu sebelum di kirim -- SUCCESS
+5. buat tampilan rekam video -- SUCCESS
+6. video yang diambil dari kamera bisa ditambah caption sebelum di kirim -- SUCCESS
+7. atur kamera mati saat mode kamera ditutup, setelah merekam video, dan setelah mengambil foto -- SUCCESS
+
+TODO 19 Agustus 2025
+1. seragamkan font untuk pesan dan caption -- SUCCESS
+2. seragamkan posisi waktu dan tombol moreVertikal -- SUCCESS
+3. samakan panjang pesan audio dengan pesan file -- SUCCESS
+4. pastikan body pesan seragam dengan garis tepi hitam dan garis dalam gambar dan video juga ada -- SUCCESS
+5. pastikan fitur hapus pesan konsisten -- SUCCESS
+
+TODO Chat belum beres
+1. pesan dari kamera belum otomatis ke bawah -- SUCCESS
+2. saat hapus pesan di tengah halaman, biarkan posisi tetap, jangan skrol ke bawah -- SUCCESS
+3. buat chat dari user lain yang di sebelah kiri 
+4. periksa implementasi local storage
+
+TODO 21 Agustus 2025
+1. buat halaman profile -- SUCCESS
+
+
+TODO 24 Agustus 2025
+1. perbaiki fitur kontak - USER -- SUCCESS
+2. perbaiki fitur user - KONTAK -- SUCCESS
+3. pastikan bila user banyak bisa di scrol -- SUCCESS
+4. pastikan bila kontak banyak bisa di scrol -- SUCCESS
+
+TODO 25 Agustus 2025
+1. simpan user dan kontak ke localstorage -- SUCCESS
+2. sinkronkan dengan tampilan sidebar -- user -- SUCCESS
+3. singkronkan dengan tampilan sidebar -- kontak -- SUCCESS
+4. aktifkan fitur cari user -- SUCCESS
+5. aktifkan fitur cari kontak -- SUCCESS
+4. buat halaman login -- SUCCESS
+5. buat halaman register -- SUCCESS
+6. perbaiki tampilan profile --> pakai header -- SUCCESS
+7. perbaiki tampilan chat, ada beberapa yang belum beres (responsive) -- SUCCESS
+
+TODO 26 Agustus 2025
+1. perbaiki respnsive halaman kontak saya (user dan kontak) -- SUCCESS
+2. buat chat kiri
+- pesan teks kiri -- SUCCESS
+- sesuaikan posisi morevertikal menu responsive kiri -- SUCCESS
+- perbaiki agar saat muncul menu morevertikal, tidak bisa di scroll 
+- pesan file kiri -- SUCCESS
+- pesan audio kiri  -- SUCCESS
+- fitur hapus pesan file, samakan ukuran "pesan telah dihapus" dengan pesan teks -- SUCCESS
+
+
+
+TODO 30 Agustus 2025
+1. sinkronkan menu kontak dengan sidebar horizontal menu -- SUCCESS
+2. perbaiki fitur scroll di menu kontak -- SUCCESS
+3. pada sidebar, kontak hanya tampilkan foto profil dan alias -- SUCCESS
+4. saat di reload, langsung tampilkan user dan kontak di sidebar -- SUCCESS
+5. pada sidebar, scrol berlaku setelah menu horizontal "user", "contacts", dan "menu" -- SUCCESS
+6. aktifkan searchbox -- SUCCESS
+
+1 September 2025
+1. pastikan searchbox bisa cari alias dari user (07:09 - 07:25)  -- SUCCESS
+2. di menu chat, patikan saat di klik morevertikal, tidak bisa di scroll (07:26 - 08:13) -- SUCCESS
+3. saat menu kontak di klik, langsung pindah ke menu chat menggantikan bento (default)  (13.27 - 15.20)  -- uncomplete
+4. saat menu kontak di klik, langsung pindah ke menu chat menggantikan bento (default)  (20.02 - 21.24 )  -- SUCCESS
+
+2 September 2025
+1. saat menu kontak di sidebar di klik, langsung pindah ke menu chat menggantikan bento (default)  (05.15 - 08.34) -- SUCCESS
+
+3 September 2025
+1. perbaiki tampilan kontak mobile  (14.17 - 15.43 ) -- SUCCESS
+
+4 September 2025
+1. perbaiki tampilan user dan kontak sidebar -- SUCCESS
+2. perbaiki tampilan chat morevertical saat chat masih sedikit  -- SUCCESS
+3. buat agar chat kiri hanya bisa hapus untuk saya -- SUCCESS
+
+
+5 September 2025
+1. buat chat tampil sesuai dengan nama kontak, simpan di localstorage agar tampilan kontak bisa sesuai
+- hapus static message -- SUCCESS
+
+7 September 2025
+1. pastikan saat menu chat dibuka, langsung ke bawah
+2. saat mengrim pesan, pastikan kata tidak terpotong ke bawah, biarkan kata utuh
+3. simpan chat terakhir di localstorage dan tampilkan di sidebar
+
+
+
+
+
+
+2. lakukan simulasi aplikasi chat tanpa api sampai proses pengiriman pesan
+3. tambahkan fitur ganti bahasa (inggris dan indonesia) dan ganti tema
