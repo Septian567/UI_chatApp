@@ -1,140 +1,133 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChatMessage } from "./useChatMessageActions";
+import { ChatMessage } from "../types/chat";
 
 export function useChatBody( messages: ChatMessage[] )
 {
     const bottomRef = useRef<HTMLDivElement | null>( null );
+    const chatBodyRef = useRef<HTMLDivElement | null>( null );
     const prevMessageCount = useRef( messages.length );
     const [isMenuOpen, setIsMenuOpen] = useState( false );
-    const chatBodyRef = useRef<HTMLDivElement | null>( null );
-    const scrollPos = useRef( 0 );
     const [isScrollable, setIsScrollable] = useState( false );
+    const blockersRef = useRef<{ wheel?: any; touch?: any; key?: any } | null>( null );
+    const hasScrolledToBottom = useRef( false );
 
-    const blockersRef = useRef<{
-        wheel?: ( e: Event ) => void;
-        touch?: ( e: Event ) => void;
-        key?: ( e: Event ) => void;
-    } | null>( null );
-
-    // cek apakah container butuh scroll
     const checkScrollable = useCallback( () =>
     {
         const el = chatBodyRef.current;
         if ( !el ) return;
-        const needsScroll = el.scrollHeight > el.clientHeight + 1;
-        setIsScrollable( needsScroll );
+        setIsScrollable( el.scrollHeight > el.clientHeight + 1 );
     }, [] );
 
-    // atur blocking saat menu dibuka/ditutup
+    // Scroll otomatis pertama kali saat semua content siap
+    useEffect( () =>
+    {
+        const el = chatBodyRef.current;
+        if ( !el || !bottomRef.current ) return;
+
+        const observer = new ResizeObserver( () =>
+        {
+            checkScrollable();
+            if ( !hasScrolledToBottom.current )
+            {
+                bottomRef.current?.scrollIntoView( { behavior: "auto" } );
+                hasScrolledToBottom.current = true;
+            }
+        } );
+
+        observer.observe( el );
+
+        return () => observer.disconnect();
+    }, [checkScrollable] );
+
+    // Auto scroll saat ada pesan baru
+    useEffect( () =>
+    {
+        if ( !bottomRef.current || !chatBodyRef.current ) return;
+
+        if ( messages.length > prevMessageCount.current )
+        {
+            const medias = chatBodyRef.current.querySelectorAll( "img, video" );
+            let loadedCount = 0;
+
+            if ( medias.length > 0 )
+            {
+                medias.forEach( ( media ) =>
+                {
+                    const isReady =
+                        ( media.tagName === "IMG" && ( media as HTMLImageElement ).complete ) ||
+                        ( media.tagName === "VIDEO" && ( media as HTMLVideoElement ).readyState >= 1 );
+
+                    if ( isReady )
+                    {
+                        loadedCount++;
+                    } else
+                    {
+                        const loadEvent = media.tagName === "IMG" ? "load" : "loadedmetadata";
+
+                        const onLoaded = () =>
+                        {
+                            loadedCount++;
+                            if ( loadedCount === medias.length )
+                            {
+                                bottomRef.current?.scrollIntoView( { behavior: "smooth" } );
+                            }
+                        };
+
+                        media.addEventListener( loadEvent, onLoaded, { once: true } );
+                        media.addEventListener( "error", onLoaded, { once: true } );
+                    }
+                } );
+
+                if ( loadedCount === medias.length )
+                {
+                    bottomRef.current.scrollIntoView( { behavior: "smooth" } );
+                }
+            } else
+            {
+                bottomRef.current.scrollIntoView( { behavior: "smooth" } );
+            }
+        }
+
+        prevMessageCount.current = messages.length;
+    }, [messages] );
+
+    // Block scroll saat menu terbuka
     useEffect( () =>
     {
         const el = chatBodyRef.current;
         if ( !el ) return;
 
-        const cleanupBlockers = () =>
+        const cleanup = () =>
         {
             if ( !blockersRef.current ) return;
-            try
-            {
-                el.removeEventListener( "wheel", blockersRef.current.wheel as EventListener );
-                el.removeEventListener( "touchmove", blockersRef.current.touch as EventListener );
-                window.removeEventListener( "keydown", blockersRef.current.key as EventListener );
-            } catch
-            {
-                /* ignore */
-            }
+            el.removeEventListener( "wheel", blockersRef.current.wheel );
+            el.removeEventListener( "touchmove", blockersRef.current.touch );
+            window.removeEventListener( "keydown", blockersRef.current.key );
             blockersRef.current = null;
         };
 
-        if ( isMenuOpen )
+        if ( isMenuOpen && isScrollable )
         {
-            scrollPos.current = el.scrollTop;
-
-            if ( isScrollable )
+            const wheelHandler = ( e: WheelEvent ) => e.preventDefault();
+            const touchHandler = ( e: TouchEvent ) => e.preventDefault();
+            const keyHandler = ( e: KeyboardEvent ) =>
             {
-                el.style.overflowY = "scroll";
+                const blockedKeys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"];
+                if ( blockedKeys.includes( e.key ) ) e.preventDefault();
+            };
 
-                const wheelHandler = ( e: WheelEvent ) => e.preventDefault();
-                const touchHandler = ( e: TouchEvent ) => e.preventDefault();
-                const keyHandler = ( e: KeyboardEvent ) =>
-                {
-                    const blockedKeys = [
-                        "ArrowUp", "ArrowDown", "PageUp", "PageDown",
-                        "Home", "End", " ", "Spacebar"
-                    ];
-                    if ( blockedKeys.includes( e.key ) )
-                    {
-                        e.preventDefault();
-                    }
-                };
+            el.addEventListener( "wheel", wheelHandler, { passive: false } );
+            el.addEventListener( "touchmove", touchHandler, { passive: false } );
+            window.addEventListener( "keydown", keyHandler );
 
-                el.addEventListener( "wheel", wheelHandler as EventListener, { passive: false } as AddEventListenerOptions );
-                el.addEventListener( "touchmove", touchHandler as EventListener, { passive: false } as AddEventListenerOptions );
-                window.addEventListener( "keydown", keyHandler as EventListener );
-
-                blockersRef.current = {
-                    wheel: wheelHandler as unknown as ( e: Event ) => void,
-                    touch: touchHandler as unknown as ( e: Event ) => void,
-                    key: keyHandler as unknown as ( e: Event ) => void,
-                };
-            } else
-            {
-                el.style.overflowY = "hidden";
-            }
-
-            el.style.pointerEvents = "auto";
+            blockersRef.current = { wheel: wheelHandler, touch: touchHandler, key: keyHandler };
         } else
         {
-            el.style.overflowY = isScrollable ? "auto" : "hidden";
-            el.style.pointerEvents = "auto";
-            el.scrollTop = scrollPos.current;
-            cleanupBlockers();
+            cleanup();
         }
 
-        return () => cleanupBlockers();
+        return cleanup;
     }, [isMenuOpen, isScrollable] );
-
-    // evaluasi kebutuhan scroll saat ukuran/pesan berubah
-    useEffect( () =>
-    {
-        const el = chatBodyRef.current;
-        if ( !el ) return;
-
-        checkScrollable();
-
-        const onResize = () => checkScrollable();
-        window.addEventListener( "resize", onResize );
-        const id = requestAnimationFrame( checkScrollable );
-
-        const mediaEls = el.querySelectorAll( "img, video" );
-        const onMediaLoad = () => checkScrollable();
-        mediaEls.forEach( ( m ) => m.addEventListener( "load", onMediaLoad ) );
-
-        return () =>
-        {
-            window.removeEventListener( "resize", onResize );
-            cancelAnimationFrame( id );
-            mediaEls.forEach( ( m ) => m.removeEventListener( "load", onMediaLoad ) );
-        };
-    }, [messages, checkScrollable] );
-
-    // auto scroll kalau ada pesan baru
-    useEffect( () =>
-    {
-        if ( messages.length > prevMessageCount.current )
-        {
-            bottomRef.current?.scrollIntoView( { behavior: "smooth" } );
-            const mediaElements = document.querySelectorAll( "img, video" );
-            mediaElements.forEach( ( el ) =>
-            {
-                el.addEventListener( "load", () =>
-                {
-                    bottomRef.current?.scrollIntoView( { behavior: "smooth" } );
-                } );
-            } );
-        }
-        prevMessageCount.current = messages.length;
-    }, [messages] );
 
     return { bottomRef, chatBodyRef, isMenuOpen, setIsMenuOpen };
 }

@@ -141,10 +141,42 @@ TODO 30 Agustus 2025
 1. buat chat tampil sesuai dengan nama kontak, simpan di localstorage agar tampilan kontak bisa sesuai
 - hapus static message -- SUCCESS
 
+
 7 September 2025
-1. pastikan saat menu chat dibuka, langsung ke bawah
-2. saat mengrim pesan, pastikan kata tidak terpotong ke bawah, biarkan kata utuh
-3. simpan chat terakhir di localstorage dan tampilkan di sidebar
+1. pastikan saat menu chat dibuka, langsung ke bawah (pakai localstorage posisi bawah supaya ga drop mendadak) -- SUCCESS
+
+8 September 2025
+1. saat edit, hapus, dan hapus untuk saya, jangan pindahkan chat ke bawah -- SUCCESS
+2. hilangkan glitch untuk pesan panjang lebar -- SUCCESS
+3. hilangkan glitch untuk "pesan telah dihapus" -- SUCCESS
+4. pastikan gambar yang di kirim langsung ke scroll ke bawah  -- SUCCESS
+5. saat mengrim pesan, pastikan kata tidak terpotong ke bawah, biarkan kata utuh -- SUCCESS
+
+9 September 2025
+1. pastikan render video selesai sebelum ditampilkan sehingga tidak glitch
+2. perbaiki tampilan file pemutar lagu pada tampilan mobile -- SUCCESS
+3. di menu kontak sidebar, saat diganti chat tiap kontak, tidak scroll dari atas ke bawah, tapi posisi langsung di bawah  -- SUCCESS
+
+
+
+4. simpan chat terakhir di localstorage dan tampilkan di sidebar
+- buat tampilan statis di sidebar  -- SUCCESS
+- tampilkan semua kontak dengan pesan dummy -- SUCCESS
+- hanya tampilkan kontak yang memiliki pesan dengan pesan dummy  -- SUCCESS
+- perbaiki tampilannya -- SUCCESS
+- sesuaikan pesan dengan pesan akhir di menu chat -- SUCCESS
+- sesuaikan isi chat dengan pesan akhir -- SUCECSS
+
+
+TODO 10 September 2025
+1. tambah pesan telah dihapus pada pesan file di lastchat sidebar -- SUCCESS
+2. tambah menu hapus percakapan di morevertical -- SUCCESS
+3. pada tampilan awal tambah logo ChatApp dan tombol ke menu dalam tampilan mobile -- SUCCESS
+4. hilangkan glitch video -- SUCCESS
+
+
+https://documenter.getpostman.com/view/19977783/2sB3HooK1S
+
 
 
 
@@ -153,3 +185,185 @@ TODO 30 Agustus 2025
 
 2. lakukan simulasi aplikasi chat tanpa api sampai proses pengiriman pesan
 3. tambahkan fitur ganti bahasa (inggris dan indonesia) dan ganti tema
+
+
+TODO 13 September 2025
+1. hubungkan data user ke api -- SUCCESS
+
+TODO 14 September 2025
+1. hubungkan data contact ke api
+- pada saat tambah alias, hubungkan ke api -- Failed
+
+
+TODO 15 September 2025
+1. pastikan getAllContact bekerja -- SUCCESS
+- buat halaman login dan get kontak baru
+- coba hubungkan api
+
+2. pastikan dihalaman kontak tampil alias dan email dari api -- SUCCESS
+3. tampilkan alias dari getAllContacts (api) di daftar user -- SUCCESS
+- buat alias:-
+- isi alias dari getAllContact
+
+4. tampilkan foto profil dari api
+- user -- SUCCESS
+- kontak -- SUCCESS
+
+
+5. hubungkan fitur tambah kontak ke api (Dummy)  -- SUCCESS
+- login
+- getAllUser
+- form tambah alias
+- masuk ke kontak
+- getAllContact berisi kontak baru
+
+6. hubungkan fitur edit kontak -- SUCCESS
+
+TODO 16 September 2025
+1. hubungkan fitur hapus kontak ke api -- SUCCESS
+
+
+
+2. perbaiki UI yang rusak
+- resizer sidebar -- SUCCESS
+- pencarian user -- SUCCESS
+- edit kontak langsung fokus -- SUCCESS
+- data user di sidebar harus menampilkan username -- SUCCESS
+- data user di sidebar harus punya foto profil -- SUCCESS
+
+
+
+TODO 17 September 2025
+1. hubungkan fitur chat
+- kirim pesan lewat API -- SUCCESS
+- cek login pakai dua user -- SUCCESS
+- tapilkan pesan yang dikirim lewat api -- SUCCESS
+
+2. perbaiki pesan file agar tampil di getChatHistory
+- perbaiki tampilan mengirim audio -- SUCCESS
+- perbaiki tampilan mengirim file audio -- SUCCESS
+- perbaiki tampilan mengirim file dengan caption -- SUCCESS
+
+
+
+TODO 18 September 2025
+1. hubungkan fitur deleteCoversationApi  -- SUCCESS
+- menggunakan userId dan ContactId
+- selaraskan dengan getChatHistory
+
+2. hubungkan fitur edit pesan lewat api -- SUCCESS
+- buat kode penghubung api
+- list file kode terlibat
+- input kode
+- prompt
+- cek fitur
+- perbaiki masalah
+
+
+
+3. hubungkan fitur hapus pesan (softDelete) lewat api -- gagal
+- ubah fungsi api menjadi softDeleteMessageApi.ts
+- sesuaikan tampilannya
+
+TODO 19 September 2025
+1. hubungkan fitur hapus pesan (softDelete) lewat api -- FAILED
+
+TODO 21 September 2025
+1. 1. hubungkan fitur hapus pesan (softDelete) lewat api
+- refactoring duplikasi kode useMessageDeletion dan useChatMessageActions -- SUCCESS
+- terapkan softDeleteApi -- SUCCESS
+- refactoring fungsi softDelete agar jadi satu module  -- SUCCESS
+- seragamkan tampilan softDelete " icon ban -- pesan telah dihapus -- waktu  "  -- FAILED
+- saat menghapus buat ban pesan dan waktu masih responsive seperti pesan biasa -- SUCCESS
+
+
+TODO 22 September 2025
+1. aktifkan hapus pesan file tanpa caption -- SUCCESS
+2. perbaiki tampilan pesan audio -- SUCCESS
+- refactoring  kode pengirim audio
+
+
+
+TODO 23 September 2025
+1. sinkronkan hapus pesan audio -- SUCCESS
+2. hubungkan hapus pesan untuk saya dari api -- SUCCESS
+
+
+TODO 27 September 2025
+1. implementasi socket.io  -- SUCCESS
+2. perbaiki pengiriman pesan teks -- SUCCESS
+3. refactoring socket.io ke file terpisah -- SUCCESS
+4. refactoring sendTextMessage ke file terpisah -- SUCCESS
+5. refactoring handleEditMessage ke file terpisah -- SUCCESS
+
+TODO 29 September 2025
+1. perbaiki posisi chat saat mengirim dan menerima -- SUCCESS
+
+TODO 30 September 2025
+1. perbaiki hapus pesan agar langsung menerapkan "useSoftDelete" -- SUCCESS
+2. seragamkan format waktu untuk setiap browser -- SUCCESS
+3. perbaiki fitur pesan audio dan file yang belum sesuai -- SUCCESS
+4. perbaiki pengiriman pesan file dengan caption -- SUCCESS
+5. buat pesan file langsung tampil saat dikirim (bukan optimistic ui) -- FAILED
+- percobaan1 - error
+- percobaab 2 - error
+6. buat file audio langsung tampil saat dikirim (bukan optimistic ui) -- FAILED
+7. buat pengiriman audio dengan loading
+- audio dikirim --> ui tampil dengan loading --> loading selesai --> tampil di chatPage --> realtime -- FAILED
+8. kirim file realtime -- SUCCESS
+9. kirim audio realtime -- SUCCESS
+10. edit caption realtime -- SUCCESS
+11. hapus pesan realtime -- SUCCESS
+12. sesuaikan pesan audio dan video -- SUCCESS
+
+
+TODO 1 OKTOBER 2025
+1. pasang foto profil di chatHeader -- SUCCESS
+2. pastikan hapus kontak cepat -- SUCCESS
+3. saat kontak dihapus, percakapan dari chat ikut dihapus -- SUCCESS
+4. saat kontak yang menampilkan chat dihapus, untuk melihat kontak harus pilih kontak lagi -- SUCCESS
+5. perbaiki responsive rekam suara agar bisa di tampilan kecil -- SUCCESS
+6. perbaiki tampilan saat deleteConversation di tampilan mobile -- SUCCESS
+
+TODO 2 OKTOBER 2025
+1. perbaiki update foto profile di api agar sinkron
+- sinkronkan ke menu kontak (user) tanpa reload -- SUCCESS
+2. perbaiki edit nama profil agar sinkron tanpa reload -- SUCCESS
+3. perbaiki update kontak agar sinkron -- SUCCESS
+4. perbaiki pilih kontak untuk melihat chat setelah kontak dihapus
+- pastikan kalau kontak lain yang dihapus, chat tetap ditampilkan -- SUCCESS
+- kalau kontak yang menampilkan chat dihapus, pilih kontak baru -- SUCCESS
+- pastikan setelah menghapus kontak, membuka chat dengan kontak baru tidak error -- SUCCESS
+5. tampilkan daftar kontak saat pertama dibuka -- SUCCESS
+6. beri foto profil di menu chat -- SUCCESS
+
+
+TODO 3 OKTOBER 2025
+
+1. tampilkan daftar chat terakhir saat pertama web dubuka
+2. tampilkan semua daftar chat -- SUCCESS
+3. tampilkan chat diatas posisi chat yang sudah dihapus untuk saya -- SUCCESS
+4. sinkron kan "hapus untuk saya" di pesan terakhir -- SUCCESS
+5. sinkronkan hapus percakapan agar percakapan di ChatPage bisa terhapus tanpa reload -- SUCCESS
+6. beri pesan (keterangan) untuk pesan file dan audio -- SUCCESS
+7. perbaiki unduh file -- SUCCESS
+
+TODO 4 OKTOBER 2025
+1. perbaiki softDeleteAudio -- SUCCESS
+
+BUG LIST
+1. saat ada 3 pesan, lalu pesan 2 di softDelete (pesan telah dihapus), dan pesan 3 dihapus untuk saya,langsung loncat ke pesan 1
+95% READY TO DEPLOY
+FINISH DEVELOPMENT -- TRY TO PRODUCTION
+
+
+DEPLOYMENT PREPARATION
+
+TODO 5 OKTOBER 2025
+1. perbaiki types error -- SUCCESS
+2. tambah pencarian kontak atau isi pesan di chat menu
+3. hilangkan glitch di chat menu sidebar
+4. sesuaikan tipe file lastChat
+5. perbaiki lastChat text -- SUCCESS
+6. sesuaikan tipe file di frontend
+6. deploy next js

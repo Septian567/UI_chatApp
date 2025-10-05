@@ -1,83 +1,48 @@
-import { useEffect, useRef, useState } from "react";
-import { User, Plus, X, Check, Pencil } from "lucide-react";
+import { User as UserIcon, Plus, X, Check, Pencil } from "lucide-react";
+import { useAlias } from "../../hooks/useAlias";
 
 interface UserItemProps
 {
-    name: string;
+    username: string;
     email: string;
     alias?: string;
-    onAliasSave?: ( name: string, email: string, alias: string ) => void;
+    avatar_url?: string;
     readOnly?: boolean;
     compact?: boolean;
     hideEmail?: boolean;
-    hideName?: boolean;
     showAliasAsName?: boolean;
+    onAliasSave?: ( username: string, email: string, alias: string ) => void;
 }
 
 export default function UserItem( {
-    name,
+    username,
     email,
     alias: propAlias = "",
-    onAliasSave,
+    avatar_url,
     readOnly = false,
     compact = false,
     hideEmail = false,
-    hideName = false,
     showAliasAsName = false,
+    onAliasSave,
 }: UserItemProps )
 {
-    const [addingAlias, setAddingAlias] = useState( false );
-    const [alias, setAlias] = useState( propAlias );
-    const storageKey = `alias_${ email }`;
-    const inputRef = useRef<HTMLInputElement>( null );
-
-    useEffect( () =>
-    {
-        setAlias( propAlias );
-    }, [propAlias] );
-
-    useEffect( () =>
-    {
-        const savedAlias = localStorage.getItem( storageKey );
-        if ( savedAlias ) setAlias( savedAlias );
-    }, [storageKey] );
-
-    useEffect( () =>
-    {
-        if ( addingAlias && inputRef.current )
-        {
-            inputRef.current.focus();
-            inputRef.current.select();
-        }
-    }, [addingAlias] );
+    const {
+        alias,
+        setAlias,
+        isEditing,
+        startEditing,
+        inputRef,
+        saveAlias,
+        cancelEditing,
+        handleKeyDown,
+    } = useAlias( email, propAlias );
 
     const handleSave = () =>
     {
         if ( alias.trim() )
         {
-            localStorage.setItem( storageKey, alias );
-            setAddingAlias( false );
-            if ( onAliasSave ) onAliasSave( name, email, alias );
-        }
-    };
-
-    const handleCancel = () =>
-    {
-        setAddingAlias( false );
-        if ( !localStorage.getItem( storageKey ) ) setAlias( "" );
-    };
-
-    const handleKeyDown = ( e: React.KeyboardEvent<HTMLInputElement> ) =>
-    {
-        if ( e.key === "Enter" )
-        {
-            e.preventDefault();
-            handleSave();
-        }
-        if ( e.key === "Escape" )
-        {
-            e.preventDefault();
-            handleCancel();
+            onAliasSave?.( username, email, alias );
+            saveAlias();
         }
     };
 
@@ -86,85 +51,78 @@ export default function UserItem( {
             className={ `flex items-center justify-between border-b ${ compact ? "py-2 pl-0 pr-2" : "p-4"
                 }` }
         >
-            {/* Avatar + Info */ }
             <div className={ `flex items-center ${ compact ? "gap-2" : "gap-3" }` }>
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0 -ml-4">
-                    <User className="w-6 h-6 text-gray-500" />
+                {/* Avatar */ }
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center shrink-0 -ml-4 overflow-hidden">
+                    { avatar_url ? (
+                        <img
+                            src={ avatar_url }
+                            alt={ username }
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <UserIcon className="w-6 h-6 text-gray-500" />
+                    ) }
                 </div>
+
+                {/* Info user */ }
                 <div className={ `flex flex-col ${ compact ? "leading-tight" : "" }` }>
-                    {/* Nama utama / alias sebagai nama */ }
+                    {/* Username atau alias */ }
                     { showAliasAsName && alias ? (
                         <span
-                            className="font-semibold text-sm truncate overflow-hidden whitespace-nowrap max-w-[180px] sm:max-w-[250px]"
+                            className="font-semibold text-sm truncate max-w-[180px] sm:max-w-[250px]"
                             title={ alias }
                         >
                             { alias }
                         </span>
                     ) : (
-                        !hideName && (
-                            <span
-                                className="font-semibold text-sm truncate overflow-hidden whitespace-nowrap max-w-[180px] sm:max-w-[250px]"
-                                title={ name }
-                            >
-                                { name }
-                            </span>
-                        )
+                        <span
+                            className="font-semibold text-sm truncate max-w-[180px] sm:max-w-[250px]"
+                            title={ username }
+                        >
+                            { username }
+                        </span>
                     ) }
 
-
                     {/* Email */ }
-                    {/* Email */ }
-                    { !hideEmail && !showAliasAsName && (
-                        <span className="text-sm text-gray-600 truncate max-w-[180px] sm:max-w-[250px] overflow-hidden">
+                    { !hideEmail && (
+                        <span className="text-sm text-gray-600 truncate max-w-[180px] sm:max-w-[250px]">
                             { email }
                         </span>
                     ) }
 
-
                     {/* Input alias */ }
-                    { addingAlias && !showAliasAsName && (
-                        <div
-                            className={ `flex items-center ${ compact ? "mt-1 gap-1" : "mt-2 gap-2"
-                                }` }
-                        >
+                    { isEditing && !showAliasAsName && (
+                        <div className={ `flex items-center ${ compact ? "mt-1 gap-1" : "mt-2 gap-2" }` }>
                             <input
                                 ref={ inputRef }
                                 type="text"
                                 value={ alias }
                                 onChange={ ( e ) => setAlias( e.target.value ) }
-                                onKeyDown={ handleKeyDown }
+                                onKeyDown={ ( e ) => handleKeyDown( e, onAliasSave, username ) }
                                 placeholder="alias..."
                                 className="border rounded px-2 py-1 text-sm"
                                 maxLength={ 15 }
                             />
-                            <button
-                                onClick={ handleSave }
-                                className="p-1 rounded hover:bg-gray-200"
-                            >
+                            <button onClick={ handleSave } className="p-1 rounded hover:bg-gray-200">
                                 <Check className="w-4 h-4 text-black" />
                             </button>
-                            <button
-                                onClick={ handleCancel }
-                                className="p-1 rounded hover:bg-gray-200"
-                            >
+                            <button onClick={ cancelEditing } className="p-1 rounded hover:bg-gray-200">
                                 <X className="w-4 h-4 text-black" />
                             </button>
                         </div>
                     ) }
 
-                    {/* Alias biasa */ }
-                    { !addingAlias && alias && !showAliasAsName && (
+                    {/* Display alias */ }
+                    { !isEditing && alias && !showAliasAsName && (
                         <span className="text-sm text-gray-500">alias: { alias }</span>
                     ) }
                 </div>
             </div>
 
-            {/* Action button */ }
-            { !addingAlias && !readOnly && !showAliasAsName && (
-                <button
-                    onClick={ () => setAddingAlias( true ) }
-                    className="p-2 rounded hover:bg-gray-100"
-                >
+            {/* Tombol edit alias */ }
+            { !isEditing && !readOnly && !showAliasAsName && (
+                <button onClick={ startEditing } className="p-2 rounded hover:bg-gray-100">
                     { alias ? (
                         <Pencil className="w-5 h-5 text-gray-600" />
                     ) : (

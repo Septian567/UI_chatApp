@@ -222,3 +222,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Di file global CSS Anda */
+#resizer {
+  z-index: 50 !important;
+}
+
+/* Pastikan tidak ada elemen lain yang menutupi resizer */
+
+
+#resizer {
+  pointer-events: all;
+}
+
+/* Prevent text selection during resize */
+body.resizing {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: col-resize !important;
+}

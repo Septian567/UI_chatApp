@@ -1,0 +1,7 @@
+daftar cara yang berhasil
+-- (kebetulan)
+1. input semua file terlibat, berikan prompt biasa
+2. periksa fitur
+3. perbaiki masalah yang ada (fitur belum beres)
+4. setiap koneksi api ke frontend biasanya memerlukan id (id harus ada)
+5. pakai debuging

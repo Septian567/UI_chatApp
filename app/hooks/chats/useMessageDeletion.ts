@@ -70,7 +70,7 @@ export function useMessageDeletion(
         const updated = [...messages];
         updated[index] = {
             ...updated[index],
-            audioUrl: null,
+            audioUrl: undefined,
             text: DEFAULT_SOFT_DELETED_TEXT,
             isSoftDeleted: true,
         };

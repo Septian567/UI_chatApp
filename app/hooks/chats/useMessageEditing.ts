@@ -64,5 +64,7 @@ export function useMessageEditing(
         handleEditFileMessage,
         handleSubmitEdit,
         handleCancelEdit,
+        setEditingIndex,
+        setEditType,
     };
 }

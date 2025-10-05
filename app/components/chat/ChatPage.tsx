@@ -1,28 +1,29 @@
 "use client";
 
-import { useSelector } from "react-redux";
-import { RootState } from "../../states";
+import { useLayoutEffect } from "react";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "../messageInput/MessageInput";
 import ChatBody from "./ChatBody";
 import { useChatPage } from "../../hooks/useChatPage";
+import { useChatHistoryManager } from "../../hooks/useChatHistoryManager";
+import { ArrowLeft } from "lucide-react";
 
 interface ChatPageProps
 {
     isMobile: boolean;
     onBack: () => void;
     sidebarWidth?: number | string;
+    contactName?: string;
 }
 
 export default function ChatPage( { isMobile, onBack }: ChatPageProps )
 {
-    const activeContact = useSelector( ( state: RootState ) => state.contacts.activeContact );
-    const contactName = activeContact?.alias || activeContact?.name || "Bento";
+    // 🔹 Semua logika fetch & pengecekan kontak ada di sini
+    const { activeContact, contactId, isActiveContactDeleted, loading, error } =
+        useChatHistoryManager();
 
     const {
         messages,
-        chatSide,
-        setChatSide,
         editingIndex,
         editType,
         editingMessage,
@@ -41,15 +42,46 @@ export default function ChatPage( { isMobile, onBack }: ChatPageProps )
         handleSendFile,
     } = useChatPage();
 
+    // 🔹 Scroll ke bawah saat kontak / messages berubah
+    useLayoutEffect( () =>
+    {
+        const el = document.getElementById( "chat-bottom" );
+        if ( el ) el.scrollIntoView( { behavior: "auto" } );
+    }, [activeContact, messages] );
+
+    // 🔹 Render placeholder jika tidak ada kontak aktif atau kontak dihapus
+    if ( !activeContact || isActiveContactDeleted )
+    {
+        return (
+            <main className="flex-1 flex flex-col items-center justify-center text-gray-500 relative">
+                { isMobile && (
+                    <button
+                        onClick={ onBack }
+                        className="absolute top-4 left-4 flex items-center text-gray-700 font-medium"
+                    >
+                        <ArrowLeft className="w-5 h-5 mr-1" />
+                        <span>menu</span>
+                    </button>
+                ) }
+                <p>silahkan pilih kontak untuk memulai chat</p>
+            </main>
+        );
+    }
+
+    const contactName = activeContact.alias || activeContact.email || "Bento";
+    const avatarUrl = activeContact.avatar_url || "";
+
     return (
         <main className="flex-1 flex flex-col bg-transparent text-black overflow-hidden">
             <ChatHeader
                 isMobile={ isMobile }
                 onBack={ onBack }
                 contactName={ contactName }
-                onChatKiri={ () => setChatSide( "kiri" ) }
-                onChatKanan={ () => setChatSide( "kanan" ) }
+                contactId={ contactId! }
+                avatarUrl={ avatarUrl }
+                
             />
+
             <ChatBody
                 messages={ messages }
                 onEditTextMessage={ handleEditTextMessage }

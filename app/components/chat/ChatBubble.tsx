@@ -4,7 +4,7 @@ interface ChatBubbleProps {
     children: ReactNode;
     variant?: "text" | "media";
     fixedWidth?: string;
-    align?: "left" | "right"; // ➕ posisi bubble
+    align?: "left" | "right";
 }
 
 export function ChatBubble({
@@ -29,7 +29,7 @@ export function ChatBubble({
                         fixedWidth
                             ? `w-[${fixedWidth}]`
                             : variant === "media"
-                            ? "w-[7cm] max-w-[5cm] sm:max-w-md"
+                            ? "w-[7cm] max-w-[7cm] sm:max-w-md"
                             : "max-w-xs sm:max-w-sm"
                     }
                 `}

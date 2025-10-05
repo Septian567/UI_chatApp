@@ -1,3 +1,4 @@
+import React from "react";
 import FilePreview from "../filePreview/FilePreview";
 import ImagePreview from "../filePreview/ImagePreview";
 import VideoPreview from "../filePreview/VideoPreview";
@@ -12,16 +13,17 @@ interface ChatFilePreviewProps
     isImage: boolean;
     isVideo: boolean;
     isAudio: boolean;
-    fileIcon: JSX.Element;
+    fileIcon: React.ReactNode;
     handleDownload: () => void;
     isSoftDeleted: boolean;
     duration?: string;
     caption?: string;
     time?: string;
-    align?: "left" | "right"; // ➕ TAMBAHKAN PROP ALIGN
+    align?: "left" | "right";
+    isActive?: boolean; // 🔹 kontrol visibility untuk persistent media
 }
 
-// Hanya render caption + time, tanpa duplikasi
+// Komponen kecil untuk caption + time
 function CaptionWithTime( { caption, time, align }: { caption?: string; time?: string; align?: "left" | "right" } )
 {
     if ( !caption && !time ) return null;
@@ -49,17 +51,18 @@ export function ChatFilePreview( {
     duration,
     caption,
     time,
-    align, // ➕ DEFAULT VALUE
+    align = "right",
+    isActive = true, // default true
 }: ChatFilePreviewProps )
 {
-
-    console.log( "ChatFilePreview - align received:", align );
-    console.log( "ChatFilePreview - props:", { fileUrl, fileName, align } );
-    // Soft deleted, tampilkan hanya teks soft delete + time
+    // Soft deleted, tampilkan teks soft delete + time
     if ( isSoftDeleted )
     {
         return (
-            <div className={ `flex justify-between items-end mt-1 text-sm text-gray-500 italic ${ align === "left" ? "flex-row" : "flex-row-reverse" }` }>
+            <div
+                className={ `flex justify-between items-end mt-1 text-sm text-gray-500 italic ${ align === "left" ? "flex-row" : "flex-row-reverse"
+                    } ${ !isActive ? "hidden" : "" }` }
+            >
                 <div>{ SOFT_DELETED_MESSAGES[1] }</div>
                 { time && <div className="text-xs text-gray-700">{ time }</div> }
             </div>
@@ -76,7 +79,7 @@ export function ChatFilePreview( {
     if ( isImage )
     {
         return (
-            <div className="flex flex-col">
+            <div className={ `flex flex-col ${ !isActive ? "hidden" : "" }` }>
                 <ImagePreview fileUrl={ fileUrl } fileName={ fileName } align={ align } />
                 <CaptionWithTime caption={ caption } time={ time } align={ align } />
             </div>
@@ -86,8 +89,8 @@ export function ChatFilePreview( {
     if ( isVideo )
     {
         return (
-            <div className="flex flex-col">
-                <VideoPreview fileUrl={ fileUrl } fileName={ fileName } duration={ duration } align={ align } />
+            <div className={ `flex flex-col ${ !isActive ? "hidden" : "" }` }>
+                <VideoPreview fileUrl={ fileUrl } fileName={ fileName } duration={ duration } align={ align } preload="auto" />
                 <CaptionWithTime caption={ caption } time={ time } align={ align } />
             </div>
         );
@@ -96,15 +99,15 @@ export function ChatFilePreview( {
     if ( isAudio )
     {
         return (
-            <div className="flex flex-col">
-                <AudioPreview fileUrl={ fileUrl } fileName={ fileName } duration={ duration } align={ align } />
+            <div className={ `flex flex-col ${ !isActive ? "hidden" : "" }` }>
+                <AudioPreview fileUrl={ fileUrl } fileName={ fileName } duration={ duration } align={ align } preload="auto" />
                 <CaptionWithTime caption={ caption } time={ time } align={ align } />
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col">
+        <div className={ `flex flex-col ${ !isActive ? "hidden" : "" }` }>
             <FilePreview
                 fileUrl={ fileUrl }
                 fileName={ fileName }

@@ -55,51 +55,14 @@ export function useSidebarLayout()
         return () => window.removeEventListener( "resize", updateIsMobile );
     }, [dispatch, hasMounted] );
 
-    useEffect( () =>
+    const handleResize = useCallback( ( newWidth: number ) =>
     {
-        if ( !hasMounted ) return;
-
-        let isResizing = false;
-
-        const onMouseMove = ( e: MouseEvent ) =>
-        {
-            if ( !isResizing ) return;
-            const newWidth = Math.min(
-                Math.max( MIN_SIDEBAR_WIDTH, e.clientX ),
-                MAX_SIDEBAR_WIDTH
-            );
-            dispatch( setSidebarWidth( newWidth ) );
-        };
-
-        const onMouseUp = () =>
-        {
-            isResizing = false;
-        };
-
-        const onMouseDown = () =>
-        {
-            isResizing = true;
-        };
-
-        const resizer = document.getElementById( "resizer" );
-        if ( resizer )
-        {
-            resizer.addEventListener( "mousedown", onMouseDown );
-        } else
-        {
-            console.warn( "Resizer element not found" );
-        }
-
-        window.addEventListener( "mousemove", onMouseMove );
-        window.addEventListener( "mouseup", onMouseUp );
-
-        return () =>
-        {
-            resizer?.removeEventListener( "mousedown", onMouseDown );
-            window.removeEventListener( "mousemove", onMouseMove );
-            window.removeEventListener( "mouseup", onMouseUp );
-        };
-    }, [dispatch, hasMounted] );
+        const calculatedWidth = Math.min(
+            Math.max( MIN_SIDEBAR_WIDTH, newWidth ),
+            MAX_SIDEBAR_WIDTH
+        );
+        dispatch( setSidebarWidth( calculatedWidth ) );
+    }, [dispatch] );
 
     const computeSidebarWidth = useCallback( () =>
     {
@@ -123,6 +86,7 @@ export function useSidebarLayout()
             handleMainMenuClick: () => { },
             computeSidebarWidth: () => 260,
             setShowSidebarOnMobile: () => { },
+            handleResize: () => { },
         };
     }
 
@@ -133,6 +97,7 @@ export function useSidebarLayout()
         showSidebarOnMobile,
         handleMainMenuClick,
         computeSidebarWidth,
+        handleResize,
         setShowSidebarOnMobile: ( val: boolean ) => dispatch( setShowSidebarOnMobile( val ) ),
     };
 }

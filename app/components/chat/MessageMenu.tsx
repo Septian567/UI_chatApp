@@ -5,7 +5,9 @@ import { useRef, useEffect, useState } from "react";
 
 interface MessageMenuProps
 {
-    isSoftDeleted: boolean;
+    isOwnMessage: boolean;   // 🔹 baru: apakah pesan dari user sendiri
+    isSoftDeleted?: boolean;
+    isDeleted?: boolean;
     align?: "left" | "right";
     onEditClick?: () => void;
     onSoftDeleteClick?: () => void;
@@ -14,7 +16,9 @@ interface MessageMenuProps
 }
 
 export function MessageMenu( {
-    isSoftDeleted,
+    isOwnMessage,
+    isSoftDeleted = false,
+    isDeleted = false,
     align = "right",
     onEditClick,
     onSoftDeleteClick,
@@ -35,40 +39,34 @@ export function MessageMenu( {
 
     const calculatePosition = () =>
     {
-        if ( buttonRef.current )
+        if ( !buttonRef.current ) return;
+        const rect = buttonRef.current.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const menuWidth = menuRef.current?.offsetWidth ?? 176;
+
+        let left: number;
+        if ( align === "right" )
         {
-            const rect = buttonRef.current.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-
-            let left: number;
-            const menuWidth = menuRef.current?.offsetWidth ?? 176; // fallback default w-44
-
-            if ( align === "right" )
+            left = rect.right + window.scrollX - menuWidth;
+        } else
+        {
+            left = rect.left + window.scrollX;
+            if ( left + menuWidth > viewportWidth - 15 )
             {
-                left = rect.right + window.scrollX - menuWidth;
-            } else
-            {
-                left = rect.left + window.scrollX;
-                if ( left + menuWidth > viewportWidth - 15 )
-                {
-                    left = viewportWidth - menuWidth - 15;
-                }
+                left = viewportWidth - menuWidth - 15;
             }
-
-            setPosition( {
-                top: rect.bottom + window.scrollY + 4,
-                left,
-            } );
         }
+
+        setPosition( {
+            top: rect.bottom + window.scrollY + 4,
+            left,
+        } );
     };
 
     const handleToggleButton = () =>
     {
-        if ( !isOpen )
-        {
-            calculatePosition(); // ✅ hitung posisi sebelum buka
-        }
-        setIsOpen( prev => !prev );
+        if ( !isOpen ) calculatePosition();
+        setIsOpen( ( prev ) => !prev );
     };
 
     useEffect( () =>
@@ -80,11 +78,7 @@ export function MessageMenu( {
     {
         if ( !isOpen ) return;
 
-        function updatePosition()
-        {
-            calculatePosition();
-        }
-
+        const updatePosition = () => calculatePosition();
         updatePosition();
         window.addEventListener( "resize", updatePosition );
         window.addEventListener( "scroll", updatePosition );
@@ -102,43 +96,28 @@ export function MessageMenu( {
             className="absolute w-44 bg-white border rounded shadow text-sm z-[9999]"
             style={ { top: position.top, left: position.left, position: "absolute" } }
         >
-            { align === "left" ? (
+            {/* Jika pesan milik user sendiri */ }
+            { isOwnMessage && !isDeleted && !isSoftDeleted && onEditClick && (
                 <button
                     type="button"
                     className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"
-                    onClick={ () => handleClick( onDeleteClick ) }
+                    onClick={ () => handleClick( onEditClick ) }
                 >
-                    <Trash2 size={ 14 } /> Hapus untuk saya
+                    <Edit3 size={ 14 } /> Edit
                 </button>
-            ) : !isSoftDeleted ? (
-                <>
-                    { onEditClick && (
-                        <button
-                            type="button"
-                            className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"
-                            onClick={ () => handleClick( onEditClick ) }
-                        >
-                            <Edit3 size={ 14 } /> Edit
-                        </button>
-                    ) }
-                    { onSoftDeleteClick && (
-                        <button
-                            type="button"
-                            className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"
-                            onClick={ () => handleClick( onSoftDeleteClick ) }
-                        >
-                            <Slash size={ 14 } /> Hapus pesan
-                        </button>
-                    ) }
-                    <button
-                        type="button"
-                        className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"
-                        onClick={ () => handleClick( onDeleteClick ) }
-                    >
-                        <Trash2 size={ 14 } /> Hapus untuk saya
-                    </button>
-                </>
-            ) : (
+            ) }
+            { isOwnMessage && !isDeleted && !isSoftDeleted && onSoftDeleteClick && (
+                <button
+                    type="button"
+                    className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"
+                    onClick={ () => handleClick( onSoftDeleteClick ) }
+                >
+                    <Slash size={ 14 } /> Hapus pesan
+                </button>
+            ) }
+
+            {/* Tombol "Hapus untuk saya" selalu ada untuk semua pesan */ }
+            { onDeleteClick && (
                 <button
                     type="button"
                     className="flex items-center gap-2 w-full text-left px-3 py-1 hover:bg-gray-100"

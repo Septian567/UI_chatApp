@@ -5,7 +5,7 @@ interface FilePreviewProps
     fileUrl: string;
     fileName: string;
     fileExtension: string;
-    fileIcon: string;
+    fileIcon: React.ReactNode;
     onDownload: () => void;
     align?: "left" | "right"; // ➕ TAMBAHKAN PROP ALIGN
 }

@@ -3,6 +3,7 @@
 import React, { useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, Transition } from "@headlessui/react";
+import { logoutUser } from "../../utils/apiUtils"; // pastikan path sesuai
 
 interface MainMenuItem
 {
@@ -21,11 +22,29 @@ export default function MainMenu( { items, onClick }: MainMenuProps )
 {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState( false );
+    const [loading, setLoading] = useState( false );
 
-    const handleLogout = () =>
+    const handleLogout = async () =>
     {
-        setIsOpen( false );
-        router.push( "/login" );
+        setLoading( true );
+        try
+        {
+            const response = await logoutUser();
+            if ( response.success )
+            {
+                router.push( "/login" );
+            } else
+            {
+                alert( response.message || "Gagal logout" );
+            }
+        } catch ( err )
+        {
+            alert( ( err as Error ).message || "Terjadi kesalahan saat logout" );
+        } finally
+        {
+            setLoading( false );
+            setIsOpen( false );
+        }
     };
 
     return (
@@ -93,14 +112,16 @@ export default function MainMenu( { items, onClick }: MainMenuProps )
                                     <button
                                         className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
                                         onClick={ () => setIsOpen( false ) }
+                                        disabled={ loading }
                                     >
                                         Tidak
                                     </button>
                                     <button
                                         className="px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800"
                                         onClick={ handleLogout }
+                                        disabled={ loading }
                                     >
-                                        Ya
+                                        { loading ? "Loading..." : "Ya" }
                                     </button>
                                 </div>
                             </Dialog.Panel>

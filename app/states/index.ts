@@ -6,6 +6,7 @@ import contactsReducer from "./contactsSlice";
 import sidebarSearchReducer from "./sidebarSearchSlice";
 import activeChatReducer from "./activeChatSlice";
 import chatReducer from "./chatSlice";
+import lastMessagesReducer from "./lastMessagesSlice";
 
 export const store = configureStore( {
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore( {
         sidebarSearch: sidebarSearchReducer,
         activeChat: activeChatReducer,
         chat: chatReducer,
+        lastMessages: lastMessagesReducer,
     },
 } );
 

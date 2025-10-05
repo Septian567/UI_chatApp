@@ -2,34 +2,23 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Contact
 {
-    name: string;
+    contact_id: string;
     email: string;
-    alias?: string;
+    alias: string;
+    avatar_url?: string;
 }
 
 interface ContactsState
 {
     list: Contact[];
-    activeContact: Contact | null; // Tambahan: menyimpan kontak yang sedang dipilih
+    activeContact: Contact | null;
 }
 
-const CONTACTS_KEY = "contacts_data";
-const ACTIVE_CONTACT_KEY = "active_contact"; // Tambahan
+// Hapus inisialisasi kontak dari localStorage
+const initialContacts: Contact[] = [];
 
-// Ambil data awal dari localStorage
-const initialContacts: Contact[] = ( () =>
-{
-    try
-    {
-        const saved = localStorage.getItem( CONTACTS_KEY );
-        return saved ? JSON.parse( saved ) : [];
-    } catch
-    {
-        return [];
-    }
-} )();
-
-// Ambil kontak aktif terakhir
+// Tetap bisa simpan activeContact di localStorage
+const ACTIVE_CONTACT_KEY = "active_contact";
 const initialActiveContact: Contact | null = ( () =>
 {
     try
@@ -44,7 +33,7 @@ const initialActiveContact: Contact | null = ( () =>
 
 const initialState: ContactsState = {
     list: initialContacts,
-    activeContact: initialActiveContact, // Tambahan
+    activeContact: initialActiveContact,
 };
 
 const contactsSlice = createSlice( {
@@ -54,44 +43,42 @@ const contactsSlice = createSlice( {
         setContacts: ( state, action: PayloadAction<Contact[]> ) =>
         {
             state.list = action.payload;
-            localStorage.setItem( CONTACTS_KEY, JSON.stringify( state.list ) );
         },
         addContact: ( state, action: PayloadAction<Contact> ) =>
         {
-            const exists = state.list.some( c => c.email === action.payload.email );
+            if ( !action.payload.contact_id )
+            {
+                console.error( "Contact harus memiliki contact_id!" );
+                return;
+            }
+            const exists = state.list.some( c => c.contact_id === action.payload.contact_id );
             if ( !exists )
             {
                 state.list.push( action.payload );
-                localStorage.setItem( CONTACTS_KEY, JSON.stringify( state.list ) );
             }
         },
         updateContactAlias: (
             state,
-            action: PayloadAction<{ email: string; alias: string }>
+            action: PayloadAction<{ contact_id: string; alias: string }>
         ) =>
         {
-            const contact = state.list.find( c => c.email === action.payload.email );
+            const contact = state.list.find( c => c.contact_id === action.payload.contact_id );
             if ( contact )
             {
                 contact.alias = action.payload.alias;
-            } else
-            {
-                state.list.push( {
-                    name: action.payload.alias,
-                    email: action.payload.email,
-                    alias: action.payload.alias,
-                } );
             }
-            localStorage.setItem( CONTACTS_KEY, JSON.stringify( state.list ) );
         },
         deleteContact: ( state, action: PayloadAction<string> ) =>
         {
-            state.list = state.list.filter( c => c.email !== action.payload );
-            localStorage.setItem( CONTACTS_KEY, JSON.stringify( state.list ) );
+            state.list = state.list.filter( c => c.contact_id !== action.payload );
         },
-        // 🔹 Tambahan: set kontak aktif
         setActiveContact: ( state, action: PayloadAction<Contact | null> ) =>
         {
+            if ( action.payload && !action.payload.contact_id )
+            {
+                console.error( "activeContact harus memiliki contact_id!" );
+                return;
+            }
             state.activeContact = action.payload;
             if ( action.payload )
             {
@@ -109,7 +96,7 @@ export const {
     addContact,
     updateContactAlias,
     deleteContact,
-    setActiveContact, // 🔹 ekspor action baru
+    setActiveContact,
 } = contactsSlice.actions;
 
 export default contactsSlice.reducer;

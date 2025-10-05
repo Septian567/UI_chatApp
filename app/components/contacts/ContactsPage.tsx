@@ -8,17 +8,19 @@ import ContactList from "./ContactList";
 import { useScrollPositions } from "../../hooks/contacts/useScrollPosition";
 import { useSearchFilter } from "../../hooks/contacts/useSearchFilter";
 import { useDispatch } from "react-redux";
-import { RootState } from "../../states";
 import { addUser } from "../../states/usersSlice";
 import { setContacts, setActiveContact } from "../../states/contactsSlice";
 import { useContactsPage } from "../../hooks/contacts/useContactsPage";
 import { useSidebarNavigation } from "../../hooks/useSidebarNavigation";
 import { useEffect } from "react";
+import { v4 as uuidv4 } from 'uuid';
+
 
 interface ContactsPageProps
 {
     isMobile: boolean;
     onBack: () => void;
+    onContactClick?: ( aliasOrName: string ) => void;
 }
 
 export default function ContactsPage( { isMobile, onBack }: ContactsPageProps )
@@ -40,10 +42,19 @@ export default function ContactsPage( { isMobile, onBack }: ContactsPageProps )
         setNewUserEmail,
         handleAddUser,
         handleCancelUser,
-        handleAliasSave,
+        handleUpdateAliasFromUser,
         handleDeleteContact,
         handleUpdateContact,
     } = useContactsPage();
+
+    const { scrollRef, handleScroll } = useScrollPositions( activeMenu );
+
+    // Gunakan hook search yang sudah menyesuaikan alias dari kontak
+    const { searchQuery, setSearchQuery, filteredUsers, filteredContacts } =
+        useSearchFilter(
+            users.map( u => ( { ...u, username: u.username || "" } ) ),
+            contacts
+        );
 
     // Sinkronkan contacts ke Redux
     useEffect( () =>
@@ -51,18 +62,21 @@ export default function ContactsPage( { isMobile, onBack }: ContactsPageProps )
         dispatch( setContacts( contacts ) );
     }, [contacts, dispatch] );
 
-    // Sinkronkan users ke Redux
+    // Sinkronkan users ke Redux (dispatch addUser) — lakukan hanya sekali per user
     useEffect( () =>
     {
-        users.forEach( ( u ) =>
+        filteredUsers.forEach( u =>
         {
-            dispatch( addUser( { name: u.name, email: u.email } ) );
+            dispatch(
+                addUser( {
+                    userId: uuidv4(), // buat ID unik
+                    username: u.username || "",
+                    email: u.email,
+                    alias: u.alias || "",
+                } )
+            );
         } );
-    }, [users, dispatch] );
-
-    const { scrollRef, handleScroll } = useScrollPositions( activeMenu );
-    const { searchQuery, setSearchQuery, filteredUsers, filteredContacts } =
-        useSearchFilter( users, contacts );
+    }, [filteredUsers, dispatch] );
 
     return (
         <main className="flex-1 flex flex-col bg-white h-screen">
@@ -85,8 +99,10 @@ export default function ContactsPage( { isMobile, onBack }: ContactsPageProps )
             >
                 { activeMenu === "user" ? (
                     <UserList
-                        users={ filteredUsers }
-                        onAliasSave={ handleAliasSave }
+                        users={ filteredUsers } // langsung pakai filteredUsers
+                        onAliasSave={ ( username, email, alias ) =>
+                            handleUpdateAliasFromUser( username, email, alias )
+                        }
                         addingUser={ addingUser }
                         newUserName={ newUserName }
                         newUserEmail={ newUserEmail }
@@ -98,26 +114,29 @@ export default function ContactsPage( { isMobile, onBack }: ContactsPageProps )
                     />
                 ) : (
                     <ContactList
-                        contacts={ filteredContacts }
+                        contacts={ filteredContacts.map( c =>
+                        {
+                            // Sinkronisasi alias terbaru dari users
+                            const user = users.find( u => u.email === c.email );
+                            return {
+                                ...c,
+                                alias: user?.alias || c.alias || "",
+                            };
+                        } ) }
                         onDelete={ handleDeleteContact }
                         onUpdate={ handleUpdateContact }
-                        onSelect={ ( email ) =>
+                        onSelect={ email =>
                         {
-                            const selectedContact = contacts.find(
-                                ( c ) => c.email === email
-                            );
+                            const selectedContact = contacts.find( c => c.email === email );
                             if ( selectedContact )
                             {
-                                // Pastikan alias diambil jika ada, jika tidak gunakan name
                                 dispatch(
                                     setActiveContact( {
                                         ...selectedContact,
-                                        alias:
-                                            selectedContact.alias ||
-                                            selectedContact.name ||
-                                            "Bento",
+                                        alias: selectedContact.alias || "",
                                     } )
                                 );
+
                             }
                             handleMainMenuClick( "chat" );
                         } }

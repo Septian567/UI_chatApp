@@ -1,4 +1,4 @@
-export function usePhotoCapture( videoRef: React.RefObject<HTMLVideoElement> )
+export function usePhotoCapture( videoRef: React.RefObject<HTMLVideoElement | null> )
 {
     const takePhoto = ( onCapture: ( file: File ) => void ) =>
     {

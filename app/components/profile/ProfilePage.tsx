@@ -1,5 +1,11 @@
-import { useState, useRef } from "react";
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import { Pencil, User, Check, ArrowLeft } from "lucide-react";
+import { getProfile, updateProfile, UserProfile } from "../../utils/apiUtils";
+import { useDispatch } from "react-redux";
+import { updateUserAvatar, updateUserName } from "../../states/usersSlice";
+import type { AppDispatch } from "../../states";
 
 interface ProfilePageProps
 {
@@ -9,15 +15,102 @@ interface ProfilePageProps
 
 export default function ProfilePage( { isMobile, onBack }: ProfilePageProps )
 {
+    const dispatch = useDispatch<AppDispatch>();
+
     const [profileImage, setProfileImage] = useState<string | null>( null );
     const fileInputRef = useRef<HTMLInputElement>( null );
 
-    const [username, setUsername] = useState( "anonim" );
-    const [email] = useState( "sdm12345dika@gmail.com" ); // email tetap
-
+    const [username, setUsername] = useState<string>( "anonim" );
+    const [email, setEmail] = useState<string>( "loading..." );
     const [isEditingName, setIsEditingName] = useState( false );
+    const [loading, setLoading] = useState( true );
+    const [saving, setSaving] = useState( false );
 
-    const handleFileChange = ( event: React.ChangeEvent<HTMLInputElement> ) =>
+    // Ambil data profile saat mount
+    useEffect( () =>
+    {
+        const fetchProfile = async () =>
+        {
+            setLoading( true );
+            try
+            {
+                const response = await getProfile();
+                if ( response.success && response.data )
+                {
+                    const user: UserProfile = response.data;
+                    setUsername( user.username ?? "anonim" );
+                    setEmail( user.email ?? "tidak tersedia" );
+                    setProfileImage( user.avatar_url ?? null );
+                } else
+                {
+                    console.error( response.message );
+                    setUsername( "anonim" );
+                    setEmail( "tidak tersedia" );
+                    setProfileImage( null );
+                }
+            } catch ( err )
+            {
+                console.error( "Gagal mengambil profile:", err );
+                setUsername( "anonim" );
+                setEmail( "tidak tersedia" );
+                setProfileImage( null );
+            } finally
+            {
+                setLoading( false );
+            }
+        };
+        fetchProfile();
+    }, [] );
+
+    // Update profile API
+    const saveProfile = async ( newUsername?: string, avatarFile?: File ) =>
+    {
+        setSaving( true );
+        try
+        {
+            const response = await updateProfile( {
+                username: newUsername ?? username,
+                avatar: avatarFile,
+            } );
+
+            if ( response.success && response.data )
+            {
+                const user: UserProfile = response.data;
+                const newAvatarUrl = user.avatar_url
+                    ? `${ user.avatar_url }?t=${ Date.now() }`
+                    : null;
+
+                setUsername( user.username ?? "anonim" );
+                setEmail( user.email ?? "tidak tersedia" );
+                setProfileImage( newAvatarUrl );
+
+                // 🔹 Dispatch update ke Redux agar ContactsPage langsung update
+                if ( user.email )
+                {
+                    if ( newAvatarUrl )
+                    {
+                        dispatch( updateUserAvatar( { email: user.email, avatar_url: newAvatarUrl } ) );
+                    }
+                    if ( user.username )
+                    {
+                        dispatch( updateUserName( { email: user.email, username: user.username } ) );
+                    }
+                }
+            } else
+            {
+                alert( response.message || "Gagal update profil" );
+            }
+        } catch ( err )
+        {
+            alert( ( err as Error ).message || "Terjadi kesalahan saat update profil" );
+        } finally
+        {
+            setSaving( false );
+            setIsEditingName( false );
+        }
+    };
+
+    const handleFileChange = async ( event: React.ChangeEvent<HTMLInputElement> ) =>
     {
         const file = event.target.files?.[0];
         if ( file )
@@ -25,14 +118,25 @@ export default function ProfilePage( { isMobile, onBack }: ProfilePageProps )
             const reader = new FileReader();
             reader.onload = () => setProfileImage( reader.result as string );
             reader.readAsDataURL( file );
+
+            // update avatar otomatis
+            await saveProfile( undefined, file );
         }
     };
 
     const handleAvatarClick = () => fileInputRef.current?.click();
 
+    if ( loading )
+    {
+        return (
+            <main className="flex-1 flex items-center justify-center bg-gray-50 min-h-screen">
+                <p className="text-gray-500">Memuat profil...</p>
+            </main>
+        );
+    }
+
     return (
         <main className="flex-1 flex flex-col bg-gray-50 min-h-screen">
-            {/* Header */ }
             <div className="w-full border-b border-gray-300 px-6 py-4 flex items-center">
                 { isMobile && (
                     <button onClick={ onBack } className="mr-3 text-black">
@@ -42,20 +146,14 @@ export default function ProfilePage( { isMobile, onBack }: ProfilePageProps )
                 <h1 className="text-xl font-bold">Profil Saya</h1>
             </div>
 
-            {/* Konten */ }
             <div className="flex flex-col items-start p-6">
                 <div className="w-full max-w-md bg-white rounded-xl shadow p-6">
-                    {/* Avatar */ }
                     <div
                         onClick={ handleAvatarClick }
                         className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 cursor-pointer mb-6 group"
                     >
                         { profileImage ? (
-                            <img
-                                src={ profileImage }
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                            />
+                            <img src={ profileImage } alt="Profile" className="w-full h-full object-cover" />
                         ) : (
                             <div className="flex items-center justify-center w-full h-full">
                                 <User className="w-12 h-12 text-gray-400" />
@@ -71,31 +169,28 @@ export default function ProfilePage( { isMobile, onBack }: ProfilePageProps )
                         accept="image/*"
                         className="hidden"
                         onChange={ handleFileChange }
+                        disabled={ saving }
                     />
 
-                    {/* Username */ }
                     <div className="w-full flex items-center justify-between border-b border-gray-200 py-2">
                         { isEditingName ? (
                             <input
                                 type="text"
-                                value={ username }
+                                value={ username ?? "" }
                                 onChange={ ( e ) => setUsername( e.target.value ) }
-                                onBlur={ () => setIsEditingName( false ) }
-                                onKeyDown={ ( e ) =>
-                                    e.key === "Enter" && setIsEditingName( false )
-                                }
+                                onBlur={ () => saveProfile( username ) }
+                                onKeyDown={ ( e ) => e.key === "Enter" && saveProfile( username ) }
                                 autoFocus
                                 className="w-full text-gray-800 font-semibold bg-transparent focus:outline-none"
+                                disabled={ saving }
                             />
                         ) : (
-                            <p className="text-gray-800 font-semibold">
-                                { username }
-                            </p>
+                            <p className="text-gray-800 font-semibold">{ username ?? "anonim" }</p>
                         ) }
                         { isEditingName ? (
                             <Check
                                 className="w-4 h-4 text-green-500 cursor-pointer"
-                                onClick={ () => setIsEditingName( false ) }
+                                onClick={ () => saveProfile( username ) }
                             />
                         ) : (
                             <Pencil
@@ -105,10 +200,9 @@ export default function ProfilePage( { isMobile, onBack }: ProfilePageProps )
                         ) }
                     </div>
 
-                    {/* Email (Read Only) */ }
                     <div className="w-full flex flex-col border-b border-gray-200 py-2 mt-4">
                         <p className="text-sm text-gray-500">Email</p>
-                        <p className="text-gray-800">{ email }</p>
+                        <p className="text-gray-800">{ email ?? "tidak tersedia" }</p>
                     </div>
                 </div>
             </div>

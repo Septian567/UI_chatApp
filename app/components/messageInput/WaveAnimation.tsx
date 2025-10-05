@@ -15,7 +15,7 @@ export default function WaveAnimation( { isPlaying }: WaveAnimationProps )
     {
       if ( window.innerWidth < 640 )
       {
-        setBarCount( 5 ); // layar kecil
+        setBarCount( 9 ); // layar kecil
       } else
       {
         setBarCount( 12 ); // layar besar

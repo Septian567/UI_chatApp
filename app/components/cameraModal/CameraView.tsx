@@ -1,9 +1,10 @@
+// app/components/cameraModal/CameraView.tsx
 import { RefreshCcw } from "lucide-react";
 import { RefObject } from "react";
 
 interface CameraViewProps
 {
-    videoRef: RefObject<HTMLVideoElement>;
+    videoRef: RefObject<HTMLVideoElement | null>; // izinkan null
     flipCamera: () => void;
     error?: string | null;
 }

@@ -4,7 +4,7 @@ interface MessageTextareaProps
     onChange: ( value: string ) => void;
     onKeyDown: React.KeyboardEventHandler<HTMLTextAreaElement>;
     placeholder: string;
-    textareaRef: React.RefObject<HTMLTextAreaElement>;
+    textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export function MessageTextarea( {

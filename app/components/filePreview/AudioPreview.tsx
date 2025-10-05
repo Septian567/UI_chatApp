@@ -4,11 +4,13 @@ import { useAudioPlayer } from "../../hooks/useAudioPlayer";
 interface AudioPreviewProps
 {
     fileUrl: string;
-    fileName: string;
-    align?: "left" | "right"; // ➕ TAMBAHKAN PROP ALIGN
+    fileName?: string;
+    align?: "left" | "right";
+    duration?: string;
+    preload?: string;
 }
 
-export default function AudioPreview( { fileUrl, fileName, align = "right" }: AudioPreviewProps ) // ➕ DEFAULT VALUE
+export default function AudioPreview( { fileUrl, fileName, align = "right" }: AudioPreviewProps )
 {
     const {
         audioRef,
@@ -16,7 +18,6 @@ export default function AudioPreview( { fileUrl, fileName, align = "right" }: Au
         currentTime,
         duration,
         togglePlay,
-        handleTimeUpdate,
         handleLoadedMetadata,
         handleSeek,
         formatTime,
@@ -27,12 +28,12 @@ export default function AudioPreview( { fileUrl, fileName, align = "right" }: Au
             <audio
                 ref={ audioRef }
                 src={ fileUrl }
-                onTimeUpdate={ handleTimeUpdate }
+                onTimeUpdate={ () => { } }
                 onLoadedMetadata={ handleLoadedMetadata }
                 className="hidden"
             />
-            <div className="flex items-center gap-2">
-                <button onClick={ togglePlay } className="p-2 text-black">
+            <div className="flex items-center gap-2 w-full min-w-0">
+                <button onClick={ togglePlay } className="p-2 text-black shrink-0">
                     { isPlaying ? <Pause size={ 20 } /> : <Play size={ 20 } /> }
                 </button>
                 <input
@@ -40,15 +41,16 @@ export default function AudioPreview( { fileUrl, fileName, align = "right" }: Au
                     min={ 0 }
                     max={ duration || 0 }
                     value={ currentTime }
-                    onChange={ handleSeek }
+                    onChange={ ( e ) => handleSeek( parseFloat( e.target.value ) ) }
                     step="0.1"
-                    className="flex-1 h-1 bg-gray-300 rounded-lg accent-green-600"
+                    className="flex-1 h-1 bg-gray-300 rounded-lg accent-green-600 min-w-0"
                 />
-                <span className="text-xs text-gray-700">
+                <span className="text-xs text-gray-700 shrink-0">
                     { formatTime( currentTime ) } / { formatTime( duration ) }
                 </span>
             </div>
-            <p className="text-sm mt-1 truncate">{ fileName }</p>
+            <p className="text-sm mt-1 truncate w-full">{ fileName }</p>
         </div>
+
     );
 }

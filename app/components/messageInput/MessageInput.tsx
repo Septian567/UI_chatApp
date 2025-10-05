@@ -6,7 +6,7 @@ import { SelectedFilePreview } from "./SelectedFilePreview";
 import { FileInputButton } from "./FileInputButton";
 import { MessageTextarea } from "./MessageTextarea";
 import { EditActions } from "./EditActions";
-import { SendActions } from "./SendActions";
+import SendActions from "./SendActions";
 import CameraModal from "../cameraModal/CameraModal";
 
 interface MessageInputProps
@@ -49,6 +49,7 @@ export default function MessageInput( {
     } );
 
     const [isCameraModalOpen, setCameraModalOpen] = useState( false );
+    const [isRecording, setIsRecording] = useState( false ); // NEW
 
     return (
         <>
@@ -94,19 +95,22 @@ export default function MessageInput( {
                         <EditActions onCancel={ onCancelEdit! } onSave={ handleSend } />
                     ) : (
                         <div className="flex items-center gap-1">
-                            {/* Kamera di kiri Mic */ }
-                            <button
-                                onClick={ () => setCameraModalOpen( true ) }
-                                className="p-2 hover:bg-gray-200 rounded-full"
-                                aria-label="Open camera"
-                            >
-                                <CameraIcon size={ 20 } />
-                            </button>
+                            {/* Kamera muncul hanya kalau tidak sedang rekam */ }
+                            { !isRecording && (
+                                <button
+                                    onClick={ () => setCameraModalOpen( true ) }
+                                    className="p-2 hover:bg-gray-200 rounded-full"
+                                    aria-label="Open camera"
+                                >
+                                    <CameraIcon size={ 20 } />
+                                </button>
+                            ) }
 
                             <SendActions
                                 onSend={ handleSend }
                                 onSendAudio={ onSendAudio }
                                 showAudioRecorder={ message.trim() === "" && !selectedFile }
+                                onRecordingChange={ setIsRecording } // NEW
                             />
                         </div>
                     ) }
